@@ -24,12 +24,12 @@ public class User {
     @Column(unique = true)
     @NotBlank
     @Size(min = 3, max = 20)
-    @Email
     private String username;
 
     @Column(unique = true)
     @NotBlank
     @Size(max = 45)
+    @Email
     private String email;
 
     @NotBlank
