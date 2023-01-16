@@ -1,6 +1,6 @@
 package com.david.express.validation;
 
-import com.david.express.exception.UserNotFoundException;
+import com.david.express.exception.ResourceNotFoundException;
 import com.david.express.validation.dto.ErrorResponseDTO;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -43,25 +43,22 @@ public class ValidationHandler extends ResponseEntityExceptionHandler {
             HttpHeaders headers,
             HttpStatus status,
             WebRequest request) {
-        Map<String, Object> response = new HashMap<>();
         ErrorResponseDTO errors = new ErrorResponseDTO(
                 HttpStatus.NOT_FOUND.getReasonPhrase(),
                 HttpStatus.NOT_FOUND.value(),
                 ex.getMessage()
         );
-        response.put("errors", errors);
-        return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+        return new ResponseEntity<>(ErrorResponseBuilder.build(errors), HttpStatus.NOT_FOUND);
     }
 
-    @ExceptionHandler(value = UserNotFoundException.class)
+    @ExceptionHandler(value = ResourceNotFoundException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public @ResponseBody Map<String, Object> handleException(UserNotFoundException ex) {
-        Map<String, Object> response = new HashMap<>();
-        response.put("errors", new ErrorResponseDTO(
+    public @ResponseBody Map<String, ErrorResponseDTO> handleException(ResourceNotFoundException ex) {
+        ErrorResponseDTO errors = new ErrorResponseDTO(
                 HttpStatus.BAD_REQUEST.getReasonPhrase(),
                 HttpStatus.BAD_REQUEST.value(),
                 ex.getMessage()
-        ));
-        return response;
+        );
+        return ErrorResponseBuilder.build(errors);
     }
 }
