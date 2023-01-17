@@ -1,6 +1,5 @@
 package com.david.express.web.note;
 
-import com.david.express.exception.ResourceNotFoundException;
 import com.david.express.model.Note;
 import com.david.express.service.NoteService;
 import com.david.express.service.UserService;
@@ -17,7 +16,6 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.time.LocalDateTime;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -72,5 +70,17 @@ public class NoteController {
         noteDto.setCreatedAt(note.getCreatedAt());
         noteDto.setAuthor(note.getUser().getUsername());
         return new ResponseEntity<>(noteDto, HttpStatus.CREATED);
+    }
+
+    public void updateNote(Long id) {
+        // Si l'utilisateur connecté
+            // est admin, possibilité de modifier n'importe quelle note
+            // n'est pas admin, vérifier que la note lui appartient avant de modifier
+    }
+
+    public void deleteNote(Long id) {
+        // Si l'utilisateur connecté
+            // est admin, possibilité de supprimer n'importe quelle note
+            // n'est pas admin, vérifier que la note lui appartient avant de supprimer
     }
 }
