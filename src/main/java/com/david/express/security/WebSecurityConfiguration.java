@@ -6,6 +6,7 @@ import com.david.express.security.service.UserDetailsServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
@@ -59,6 +60,8 @@ public class WebSecurityConfiguration {
                 .and().authorizeRequests()
                 .antMatchers("/api/v1/auth/**").permitAll()
                 .antMatchers("/api/v1/tests/**").permitAll()
+                .antMatchers(HttpMethod.GET, "/api/v1/notes/**").permitAll()
+                .antMatchers(HttpMethod.POST, "/api/v1/notes").authenticated()
                 .anyRequest().authenticated();
 
         http.authenticationProvider(authenticationProvider());

@@ -7,6 +7,7 @@ import com.david.express.service.RoleService;
 import com.david.express.service.UserService;
 import com.david.express.validation.dto.SuccessResponseDTO;
 import com.david.express.web.user.dto.UserDTO;
+import com.david.express.web.user.dto.UserResponseDTO;
 import com.david.express.web.user.dto.UserUpdateDTO;
 import com.david.express.web.user.mapper.UserDTOMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,13 +36,13 @@ public class UserController {
 
     @GetMapping("")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<List<UserDTO>> getAllUsers() {
-        return ResponseEntity.ok(userService
+    public ResponseEntity<UserResponseDTO> getAllUsers() {
+        List<UserDTO> users = userService
                 .findAllUsers()
                 .stream()
                 .map(UserDTOMapper::toUserDTO)
-                .collect(Collectors.toList())
-        );
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(new UserResponseDTO(users, users.size()));
     }
 
     @GetMapping("/{id}")
