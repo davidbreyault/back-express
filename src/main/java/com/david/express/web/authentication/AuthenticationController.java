@@ -1,15 +1,12 @@
 package com.david.express.web.authentication;
 
 import com.david.express.model.User;
-import com.david.express.repository.RoleRepository;
 import com.david.express.repository.UserRepository;
 import com.david.express.security.jwt.JwtUtils;
-import com.david.express.security.service.UserDetailsImpl;
 import com.david.express.service.RoleService;
 import com.david.express.validation.ErrorResponseBuilder;
 import com.david.express.validation.dto.ErrorResponseDTO;
 import com.david.express.validation.dto.SuccessResponseDTO;
-import com.david.express.web.authentication.dto.request.AuthenticationRequestDTO;
 import com.david.express.web.authentication.dto.request.RegistrationRequestDTO;
 import com.david.express.web.authentication.dto.response.AuthenticationJwtResponseDTO;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +15,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
@@ -25,7 +23,6 @@ import org.springframework.web.bind.annotation.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/v1/auth")
@@ -36,8 +33,6 @@ public class AuthenticationController {
     @Autowired
     private UserRepository userRepository;
     @Autowired
-    private RoleRepository roleRepository;
-    @Autowired
     private PasswordEncoder passwordEncoder;
     @Autowired
     private RoleService roleService;
@@ -45,22 +40,30 @@ public class AuthenticationController {
     private JwtUtils jwtUtils;
 
     @PostMapping("/authenticate")
-    public ResponseEntity<?> authenticate(@Valid @RequestBody AuthenticationRequestDTO authRequest, HttpServletRequest request) {
-        //System.out.println(request.getHeader("Authorization"));
-        Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(
-                        authRequest.getUsername(),
-                        authRequest.getPassword()
-                )
-        );
-        SecurityContextHolder.getContext().setAuthentication(authentication);
-        String jwt = jwtUtils.generateJwtToken(authentication);
-        UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
-        List<String> roles = userDetails.getAuthorities()
-                .stream()
-                .map(item -> item.getAuthority())
-                .collect(Collectors.toList());
-        return ResponseEntity.ok(new AuthenticationJwtResponseDTO(jwt));
+    public ResponseEntity<?> authenticate(HttpServletRequest request) {
+        // Récupération des identifiants dans la requête
+        final String authorization = request.getHeader("Authorization");
+        if (authorization != null && authorization.startsWith("Basic ")) {
+            String encodedCredentials = request.getHeader("Authorization").substring(6);
+            byte[] valueDecoded = Base64.getDecoder().decode(encodedCredentials);
+            String decodedCredentials = new String(valueDecoded);
+            final String[] values = decodedCredentials.split(":", 2);
+            String username = values[0];
+            String password = values[1];
+            Authentication authentication = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(username,password)
+            );
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+            String jwt = jwtUtils.generateJwtToken(authentication);
+            return ResponseEntity.ok(new AuthenticationJwtResponseDTO(jwt));
+        } else {
+            throw new AuthenticationException("Authentication failed") {
+                @Override
+                public String getMessage() {
+                    return super.getMessage();
+                }
+            };
+        }
     }
 
     @PostMapping("/register")
