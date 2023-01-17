@@ -1,6 +1,8 @@
 package com.david.express.model;
 
 import lombok.*;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
@@ -34,7 +36,7 @@ public class Note {
     @NotBlank
     private LocalDateTime createdAt;
 
-    @ManyToOne
-    @JoinColumn(name = "app_user_id")
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "app_user_id", nullable = false)
     private User user;
 }

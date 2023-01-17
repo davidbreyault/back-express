@@ -1,11 +1,11 @@
-package com.david.express.web.authentication.dto.response;
+package com.david.express.validation.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
 @Data
 @AllArgsConstructor
-public class RegistrationErrorResponseDTO {
+public class SuccessResponseDTO {
 
     private String message;
 }

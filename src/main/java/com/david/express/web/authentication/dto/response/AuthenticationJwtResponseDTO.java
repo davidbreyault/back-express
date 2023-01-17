@@ -3,11 +3,11 @@ package com.david.express.web.authentication.dto.response;
 import lombok.Data;
 
 @Data
-public class AuthenticationSuccessResponseDTO {
+public class AuthenticationJwtResponseDTO {
 
     private String accessToken;
 
-    public AuthenticationSuccessResponseDTO(String token) {
+    public AuthenticationJwtResponseDTO(String token) {
         this.accessToken = token;
     }
 }
