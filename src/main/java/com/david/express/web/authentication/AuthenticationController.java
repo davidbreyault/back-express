@@ -1,12 +1,11 @@
 package com.david.express.web.authentication;
 
-import com.david.express.model.Role;
-import com.david.express.model.RoleEnum;
 import com.david.express.model.User;
 import com.david.express.repository.RoleRepository;
 import com.david.express.repository.UserRepository;
 import com.david.express.security.jwt.JwtUtils;
 import com.david.express.security.service.UserDetailsImpl;
+import com.david.express.service.RoleService;
 import com.david.express.validation.ErrorResponseBuilder;
 import com.david.express.validation.dto.ErrorResponseDTO;
 import com.david.express.validation.dto.SuccessResponseDTO;
@@ -34,16 +33,14 @@ public class AuthenticationController {
 
     @Autowired
     private AuthenticationManager authenticationManager;
-
     @Autowired
     private UserRepository userRepository;
-
     @Autowired
     private RoleRepository roleRepository;
-
     @Autowired
     private PasswordEncoder passwordEncoder;
-
+    @Autowired
+    private RoleService roleService;
     @Autowired
     private JwtUtils jwtUtils;
 
@@ -95,37 +92,8 @@ public class AuthenticationController {
                 .username(registrationRequest.getUsername())
                 .email(registrationRequest.getEmail())
                 .password(passwordEncoder.encode(registrationRequest.getPassword()))
+                .roles(roleService.rolesAssignmentByRegistration())
                 .build();
-
-        // Attribution des rôles
-        Set<String> strRoles = registrationRequest.getRoles();
-        Set<Role> roles = new HashSet<>();
-
-        if (strRoles == null) {
-            Role userRole = roleRepository.findByName(RoleEnum.ROLE_READER)
-                    .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
-            roles.add(userRole);
-        } else {
-            strRoles.forEach(role -> {
-                switch (role) {
-                    case "admin":
-                        Role adminRole = roleRepository.findByName(RoleEnum.ROLE_ADMIN)
-                                .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
-                        roles.add(adminRole);
-                        break;
-                    case "writer":
-                        Role writerRole = roleRepository.findByName(RoleEnum.ROLE_WRITER)
-                                .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
-                        roles.add(writerRole);
-                        break;
-                    default:
-                        Role readerRole = roleRepository.findByName(RoleEnum.ROLE_READER)
-                                .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
-                        roles.add(readerRole);
-                }
-            });
-        }
-        user.setRoles(roles);
         userRepository.save(user);
         return ResponseEntity.ok(new SuccessResponseDTO("User registered successfully!"));
     }
