@@ -13,15 +13,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.time.LocalDateTime;
-import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -100,10 +97,40 @@ public class NoteController {
         return ResponseEntity.ok(new SuccessResponseDTO("Your dislike has been sent to this note"));
     }
 
-    public void updateNote(Long id) {
-        // Si l'utilisateur connecté
-            // est admin, possibilité de modifier n'importe quelle note
-            // n'est pas admin, vérifier que la note lui appartient avant de modifier
+    @PutMapping("/{id}")
+    @PreAuthorize("hasRole('WRITER')")
+    public ResponseEntity<NoteDTO> updateNote(@PathVariable Long id, @Valid @RequestBody NoteDTO noteDto) {
+        UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        Note note = noteService.findNoteById(id).get();
+        // Si l'utilisateur connecté possède le role admin
+        if (CheckRoles.isLoggedUserHasAdminRole()) {
+            // Possibilité de modifier n'importe quelle note
+            note.setNote(noteDto.getNote());
+            note.setLikes(noteDto.getLikes());
+            note.setDislikes(noteDto.getDislikes());
+            note.setUser(userService.findUserByUsername(noteDto.getAuthor()));
+            noteService.save(note);
+            noteDto.setId(note.getId());
+            noteDto.setLikes(note.getLikes());
+            noteDto.setDislikes(note.getDislikes());
+            noteDto.setCreatedAt(note.getCreatedAt());
+            noteDto.setAuthor(note.getUser().getUsername());
+        } else {
+            // Si non, vérifier que la note à supprimer appartient bien à l'utilisateur connecté
+            if (note.getUser().getUsername().equals(userDetails.getUsername())) {
+                // ...qui ne peut seulement modifier le contenu de sa note.
+                note.setNote(noteDto.getNote());
+                noteService.save(note);
+                noteDto.setId(note.getId());
+                noteDto.setLikes(note.getLikes());
+                noteDto.setDislikes(note.getDislikes());
+                noteDto.setCreatedAt(note.getCreatedAt());
+                noteDto.setAuthor(note.getUser().getUsername());
+            } else {
+                throw new UserNotResourceOwnerException("You are not allowed to update this resource !");
+            }
+        }
+        return ResponseEntity.ok(noteDto);
     }
 
     @DeleteMapping("/{id}")
