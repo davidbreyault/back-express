@@ -1,10 +1,12 @@
 package com.david.express.model;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.*;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "app_comment")
@@ -20,18 +22,18 @@ public class Comment {
     private Long id;
 
     @NotBlank
-    @Size(max = 255)
+    @Size(min = 3, max = 255)
     private String message;
 
     @Column(name = "created_at")
-    @NotBlank
-    private String createdAt;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
+    private LocalDateTime createdAt;
 
-    @ManyToOne
-    @JoinColumn(name = "app_note_id")
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "app_note_id", nullable = false)
     private Note note;
 
-    @ManyToOne
-    @JoinColumn(name = "app_user_id")
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "app_user_id", nullable = false)
     private User user;
 }
