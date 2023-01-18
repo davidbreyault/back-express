@@ -62,6 +62,8 @@ public class WebSecurityConfiguration {
                 .antMatchers("/api/v1/tests/**").permitAll()
                 .antMatchers(HttpMethod.GET, "/api/v1/notes/**").permitAll()
                 .antMatchers(HttpMethod.POST, "/api/v1/notes").authenticated()
+                .antMatchers(HttpMethod.PUT, "/api/v1/notes/like/**").authenticated()
+                .antMatchers(HttpMethod.PUT, "/api/v1/notes/dislike/**").authenticated()
                 .anyRequest().authenticated();
 
         http.authenticationProvider(authenticationProvider());

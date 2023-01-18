@@ -37,4 +37,12 @@ public class Note {
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "app_user_id", nullable = false)
     private User user;
+
+    public void like() {
+        setLikes(getLikes() + 1);
+    }
+
+    public void dislike() {
+        setDislikes(getDislikes() + 1);
+    }
 }
