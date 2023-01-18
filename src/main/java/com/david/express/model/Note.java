@@ -1,5 +1,6 @@
 package com.david.express.model;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.*;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
@@ -23,20 +24,25 @@ public class Note {
     private Long id;
 
     @NotBlank
-    @Size(max = 255)
+    @Size(min = 3, max = 255)
     private String note;
 
-    @NotBlank
     private int likes;
-
-    @NotBlank
     private int dislikes;
 
     @Column(name = "created_at")
-    @NotBlank
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime createdAt;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "app_user_id", nullable = false)
     private User user;
+
+    public void like() {
+        setLikes(getLikes() + 1);
+    }
+
+    public void dislike() {
+        setDislikes(getDislikes() + 1);
+    }
 }

@@ -27,6 +27,13 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public User findUserByUsername(String username) throws ResourceNotFoundException {
+        return userRepository.findByUsername(username).orElseThrow(
+                () -> new ResourceNotFoundException("User not found with username : " + username)
+        );
+    }
+
+    @Override
     public void deleteUserById(Long id) throws ResourceNotFoundException {
         User user = findUserById(id);
         userRepository.deleteById(user.getId());
