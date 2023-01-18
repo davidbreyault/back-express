@@ -10,6 +10,7 @@ import com.david.express.validation.dto.SuccessResponseDTO;
 import com.david.express.web.authentication.dto.request.RegistrationRequestDTO;
 import com.david.express.web.authentication.dto.response.AuthenticationJwtResponseDTO;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -55,7 +56,9 @@ public class AuthenticationController {
             );
             SecurityContextHolder.getContext().setAuthentication(authentication);
             String jwt = jwtUtils.generateJwtToken(authentication);
-            return ResponseEntity.ok(new AuthenticationJwtResponseDTO(jwt));
+            HttpHeaders responseHeaders = new HttpHeaders();
+            responseHeaders.set("accessToken", jwt);
+            return ResponseEntity.ok().headers(responseHeaders).body(new SuccessResponseDTO("Authenticated !"));
         } else {
             throw new AuthenticationException("Authentication failed") {
                 @Override

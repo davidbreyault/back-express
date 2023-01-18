@@ -1,5 +1,7 @@
 package com.david.express.web.note;
 
+import com.david.express.common.CheckRoles;
+import com.david.express.exception.UserNotResourceOwnerException;
 import com.david.express.model.Note;
 import com.david.express.service.NoteService;
 import com.david.express.service.UserService;
@@ -11,12 +13,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.time.LocalDateTime;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -101,9 +106,26 @@ public class NoteController {
             // n'est pas admin, vérifier que la note lui appartient avant de modifier
     }
 
-    public void deleteNote(Long id) {
-        // Si l'utilisateur connecté
-            // est admin, possibilité de supprimer n'importe quelle note
-            // n'est pas admin, vérifier que la note lui appartient avant de supprimer
+    @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('WRITER')")
+    public ResponseEntity<SuccessResponseDTO> deleteNote(@PathVariable Long id) {
+        UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        // Si l'utilisateur connecté possède le role admin
+        if (CheckRoles.isLoggedUserHasAdminRole()) {
+            // Possibilité de supprimer n'importe quelle note
+            noteService.deleteNoteById(id);
+            return ResponseEntity.ok(new SuccessResponseDTO("Note has been deleted successfully !"));
+        } else {
+            Optional<Note> note = noteService.findNoteById(id);
+            note.ifPresent(n -> {
+                // Si non, vérifier que la note à supprimer appartient bien à l'utilisateur connecté
+                if (n.getUser().getUsername().equals(userDetails.getUsername())) {
+                    noteService.deleteNoteById(id);
+                } else {
+                    throw new UserNotResourceOwnerException("You are not allowed to delete this resource !");
+                }
+            });
+            return ResponseEntity.ok(new SuccessResponseDTO("Your note has been deleted successfully !"));
+        }
     }
 }

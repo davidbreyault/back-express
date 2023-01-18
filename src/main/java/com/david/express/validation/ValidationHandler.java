@@ -1,6 +1,7 @@
 package com.david.express.validation;
 
 import com.david.express.exception.ResourceNotFoundException;
+import com.david.express.exception.UserNotResourceOwnerException;
 import com.david.express.validation.dto.ErrorResponseDTO;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -54,6 +55,17 @@ public class ValidationHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(value = ResourceNotFoundException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public @ResponseBody Map<String, ErrorResponseDTO> handleException(ResourceNotFoundException ex) {
+        ErrorResponseDTO errors = new ErrorResponseDTO(
+                HttpStatus.BAD_REQUEST.getReasonPhrase(),
+                HttpStatus.BAD_REQUEST.value(),
+                ex.getMessage()
+        );
+        return ErrorResponseBuilder.build(errors);
+    }
+
+    @ExceptionHandler(value = UserNotResourceOwnerException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public @ResponseBody Map<String, ErrorResponseDTO> handleException(UserNotResourceOwnerException ex) {
         ErrorResponseDTO errors = new ErrorResponseDTO(
                 HttpStatus.BAD_REQUEST.getReasonPhrase(),
                 HttpStatus.BAD_REQUEST.value(),
