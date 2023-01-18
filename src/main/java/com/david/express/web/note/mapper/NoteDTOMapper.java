@@ -12,10 +12,11 @@ public class NoteDTOMapper {
         return new NoteDTO(
                 note.getId(),
                 note.getNote(),
+                note.getUser().getUsername(),
                 note.getCreatedAt(),
                 note.getLikes(),
                 note.getDislikes(),
-                note.getUser().getUsername()
+                note.getComments().size()
         );
     }
 }

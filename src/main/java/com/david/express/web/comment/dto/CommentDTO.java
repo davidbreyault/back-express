@@ -1,7 +1,8 @@
-package com.david.express.web.note.dto;
+package com.david.express.web.comment.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 
@@ -12,20 +13,18 @@ import java.time.LocalDateTime;
 @Data
 @RequiredArgsConstructor
 @AllArgsConstructor
-public class NoteDTO {
+public class CommentDTO {
 
     private Long id;
 
     @NotBlank
     @Size(min = 3, max = 255)
-    private String note;
-
-    private String author;
+    private String message;
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime createdAt;
 
-    private int likes;
-    private int dislikes;
-    private int totalNoteComments;
+    private Long userId;
+    private String username;
+    private Long noteId;
 }

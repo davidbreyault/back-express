@@ -1,6 +1,7 @@
 package com.david.express.service;
 
 import com.david.express.exception.ResourceNotFoundException;
+import com.david.express.model.Comment;
 import com.david.express.model.Note;
 import com.david.express.repository.NoteRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,6 +28,15 @@ public class NoteServiceImpl implements NoteService {
             throw new ResourceNotFoundException("Note not found with id : " + id);
         }
         return note;
+    }
+
+    @Override
+    public List<Comment> findNoteComments(Long id) throws ResourceNotFoundException {
+        Optional<Note> note = findNoteById(id);
+        if (!note.isPresent()) {
+            throw new ResourceNotFoundException("Note not found with id : " + id);
+        }
+        return note.get().getComments();
     }
 
     @Override

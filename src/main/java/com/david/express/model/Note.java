@@ -9,6 +9,7 @@ import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Table(name = "app_note")
@@ -37,6 +38,9 @@ public class Note {
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "app_user_id", nullable = false)
     private User user;
+
+    @OneToMany(mappedBy = "note", cascade = CascadeType.ALL)
+    private List<Comment> comments;
 
     public void like() {
         setLikes(getLikes() + 1);
