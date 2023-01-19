@@ -1,15 +1,19 @@
 package com.david.express.web.comment;
 
+import com.david.express.common.CheckRoles;
+import com.david.express.exception.UserNotResourceOwnerException;
 import com.david.express.model.Comment;
 import com.david.express.service.CommentService;
 import com.david.express.service.NoteService;
 import com.david.express.service.UserService;
+import com.david.express.validation.dto.SuccessResponseDTO;
 import com.david.express.web.comment.dto.CommentDTO;
 import com.david.express.web.comment.dto.CommentResponseDTO;
 import com.david.express.web.comment.mapper.CommentDTOMapper;
 import com.david.express.web.comment.dto.NoteCommentDTO;
 import com.david.express.web.comment.dto.NoteCommentResponseDTO;
 import com.david.express.web.comment.mapper.NoteCommentDTOMapper;
+import org.apache.coyote.Response;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -79,5 +83,61 @@ public class CommentController {
         commentDto.setUsername(comment.getUser().getUsername());
         commentDto.setNoteId(comment.getNote().getId());
         return new ResponseEntity<>(commentDto, HttpStatus.CREATED);
+    }
+
+    @PutMapping("/comments/{id}")
+    @PreAuthorize("hasRole('WRITER')")
+    public ResponseEntity<CommentDTO> updateComment(@PathVariable Long id, @Valid @RequestBody CommentDTO commentDto) {
+        Comment commentToUpdate = commentService.findCommentById(id).get();
+        if (CheckRoles.isLoggedUserHasAdminRole()) {
+            // Admin : peut modifier le message, la date de création, l'auteur de n'importe quel utilisateur
+            commentToUpdate.setMessage(commentDto.getMessage() != null
+                    ? commentDto.getMessage() : commentToUpdate.getMessage());
+            commentToUpdate.setCreatedAt(commentDto.getCreatedAt() != null
+                    ? commentDto.getCreatedAt() : commentToUpdate.getCreatedAt());
+            commentToUpdate.setUser(commentDto.getUsername() != null
+                    ? userService.findUserByUsername(commentDto.getUsername()) : commentToUpdate.getUser());
+        } else {
+            if (!isLoggedUserIsCommentOwner(id)) {
+                throw new UserNotResourceOwnerException("You are not allowed to update this resource !");
+            }
+            // Non admin : ne peut seulement modifier le message
+            commentToUpdate.setMessage(commentDto.getMessage() != null
+                    ? commentDto.getMessage() : commentToUpdate.getMessage());
+        }
+        commentService.save(commentToUpdate);
+        commentDto.setId(commentToUpdate.getId());
+        commentDto.setMessage(commentToUpdate.getMessage());
+        commentDto.setCreatedAt(commentToUpdate.getCreatedAt());
+        commentDto.setUserId(commentToUpdate.getUser().getId());
+        commentDto.setUsername(commentToUpdate.getUser().getUsername());
+        commentDto.setNoteId(commentToUpdate.getNote().getId());
+        return ResponseEntity.ok(commentDto);
+    }
+
+    @DeleteMapping("/comments/{id}")
+    @PreAuthorize("hasRole('WRITER')")
+    public ResponseEntity<?> deleteComment(@PathVariable Long id) {
+        if (CheckRoles.isLoggedUserHasAdminRole()) {
+            String message = isLoggedUserIsCommentOwner(id)
+                    ? "Your comment has been deleted successfully !"
+                    : commentService.findCommentById(id).get().getUser().getUsername()
+                        + "'s comment has been deleted successfully !";
+            // Opération de suppression à effectuer en tout dernier pour éviter les exceptions
+            commentService.deleteCommentById(id);
+            return ResponseEntity.ok(new SuccessResponseDTO(message));
+        } else {
+            if (!isLoggedUserIsCommentOwner(id)) {
+                throw new UserNotResourceOwnerException("You are not allowed to delete this resource !");
+            }
+            commentService.deleteCommentById(id);
+            return ResponseEntity.ok(new SuccessResponseDTO("Your comment has been deleted successfully !"));
+        }
+    }
+
+    private boolean isLoggedUserIsCommentOwner(Long id) {
+        UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        Comment comment = commentService.findCommentById(id).get();
+        return comment.getUser().getUsername().equals(userDetails.getUsername());
     }
 }
