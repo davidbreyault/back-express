@@ -21,6 +21,6 @@ public class RegistrationRequestDTO {
     private String email;
 
     @NotBlank(message = "Password is required.")
-    @Size(min = 6, max = 40, message = "Username must be 6-40 characters long.")
+    @Size(min = 6, max = 40, message = "Password must be 6-40 characters long.")
     private String password;
 }

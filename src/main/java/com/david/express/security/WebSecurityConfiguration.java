@@ -1,5 +1,6 @@
 package com.david.express.security;
 
+import com.david.express.repository.CommentRepository;
 import com.david.express.security.jwt.AuthenticationEntryPointHandler;
 import com.david.express.security.jwt.AuthenticationTokenFilter;
 import com.david.express.security.service.UserDetailsServiceImpl;
@@ -17,6 +18,12 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
+import java.util.Arrays;
+import java.util.Collections;
 
 @Configuration
 @EnableGlobalMethodSecurity(prePostEnabled = true)
@@ -27,6 +34,8 @@ public class WebSecurityConfiguration {
 
     @Autowired
     private AuthenticationEntryPointHandler unauthorizedPointHandler;
+    @Autowired
+    private CommentRepository commentRepository;
 
     @Bean
     public AuthenticationTokenFilter authenticationJwtTokenFilter() {
@@ -52,9 +61,20 @@ public class WebSecurityConfiguration {
     }
 
     @Bean
+    CorsConfigurationSource corsConfigurationSource() {
+        final UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        CorsConfiguration config = new CorsConfiguration();
+        source.registerCorsConfiguration("/**", config.applyPermitDefaultValues());
+        config.setAllowedOrigins(Collections.singletonList("*"));
+        config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE"));
+        config.setExposedHeaders(Collections.singletonList("Authorization"));
+        return source;
+    }
+
+    @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-                .cors().and().csrf().disable()
+                .csrf().disable()
                 .exceptionHandling().authenticationEntryPoint(unauthorizedPointHandler)
                 .and().sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and().authorizeRequests()
@@ -64,6 +84,7 @@ public class WebSecurityConfiguration {
                 .antMatchers(HttpMethod.GET, "/api/v1/comments/**").permitAll()
                 .anyRequest().authenticated();
 
+        http.cors();
         http.authenticationProvider(authenticationProvider());
         http.addFilterBefore(authenticationJwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);
         return http.build();

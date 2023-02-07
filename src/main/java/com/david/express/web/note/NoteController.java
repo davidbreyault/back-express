@@ -2,7 +2,6 @@ package com.david.express.web.note;
 
 import com.david.express.common.CheckRoles;
 import com.david.express.exception.UserNotResourceOwnerException;
-import com.david.express.model.Comment;
 import com.david.express.model.Note;
 import com.david.express.service.NoteService;
 import com.david.express.service.UserService;
@@ -20,13 +19,12 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.time.LocalDateTime;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
 @RestController
+@CrossOrigin(origins = "*", maxAge = 3600)
 @RequestMapping("/api/v1/notes")
 public class NoteController {
 
@@ -87,6 +85,7 @@ public class NoteController {
 
         noteService.save(note);
         noteDto.setId(note.getId());
+        noteDto.setNote(note.getNote());
         noteDto.setLikes(note.getLikes());
         noteDto.setDislikes(note.getDislikes());
         noteDto.setCreatedAt(note.getCreatedAt());

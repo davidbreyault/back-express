@@ -17,7 +17,7 @@ public class NoteDTO {
     private Long id;
 
     @NotBlank
-    @Size(min = 3, max = 255)
+    @Size(min = 10, max = 255, message = "Note must be 10-255 characters long.")
     private String note;
 
     private String author;
