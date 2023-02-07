@@ -8,7 +8,6 @@ import com.david.express.validation.ErrorResponseBuilder;
 import com.david.express.validation.dto.ErrorResponseDTO;
 import com.david.express.validation.dto.SuccessResponseDTO;
 import com.david.express.web.authentication.dto.request.RegistrationRequestDTO;
-import com.david.express.web.authentication.dto.response.AuthenticationJwtResponseDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -26,6 +25,7 @@ import javax.validation.Valid;
 import java.util.*;
 
 @RestController
+@CrossOrigin(origins = "*", maxAge = 3600)
 @RequestMapping("/api/v1/auth")
 public class AuthenticationController {
 
@@ -57,7 +57,7 @@ public class AuthenticationController {
             SecurityContextHolder.getContext().setAuthentication(authentication);
             String jwt = jwtUtils.generateJwtToken(authentication);
             HttpHeaders responseHeaders = new HttpHeaders();
-            responseHeaders.set("accessToken", jwt);
+            responseHeaders.set("Authorization", jwt);
             return ResponseEntity.ok().headers(responseHeaders).body(new SuccessResponseDTO("Authenticated !"));
         } else {
             throw new AuthenticationException("Authentication failed") {
