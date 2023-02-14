@@ -27,5 +27,5 @@ public class NoteDTO {
 
     private int likes;
     private int dislikes;
-    private int totalNoteComments;
+    private int comments;
 }
