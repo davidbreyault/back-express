@@ -35,6 +35,7 @@ public class NoteController {
 
     @GetMapping("")
     public ResponseEntity<NoteResponseDTO> getAllNotes() {
+        noteService.getTrendingWords();
         List<NoteDTO> notes = noteService.findAll()
                 .stream()
                 .map(NoteDTOMapper::toNoteDTO)
@@ -53,20 +54,19 @@ public class NoteController {
         return ResponseEntity.ok(noteDto);
     }
 
-    @GetMapping("/trending")
-    public ResponseEntity<NoteResponseDTO> getTrendingNotes(@RequestParam int top) {
-        System.out.println("/api/v1/notes/trend : get trend top notes number : " + top + ".");
-        List<NoteDTO> trendingNotes = noteService.findAll()
+    @GetMapping("/best")
+    public ResponseEntity<NoteResponseDTO> getBestNotes(@RequestParam int top) {
+        List<NoteDTO> bestNotes = noteService.findAll()
                 .stream()
                 .map(NoteDTOMapper::toNoteDTO)
                 .sorted((NoteDTO n1, NoteDTO n2) -> n2.getLikes() - n1.getLikes())
                 .limit(top)
                 .collect(Collectors.toList());
-        NoteResponseDTO trendingNotesResponse = new NoteResponseDTO(
-                trendingNotes,
-                trendingNotes.size()
+        NoteResponseDTO bestNotesResponse = new NoteResponseDTO(
+                bestNotes,
+                bestNotes.size()
         );
-        return ResponseEntity.ok(trendingNotesResponse);
+        return ResponseEntity.ok(bestNotesResponse);
     }
 
     @PostMapping("")

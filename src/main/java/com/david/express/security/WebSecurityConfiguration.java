@@ -80,6 +80,7 @@ public class WebSecurityConfiguration {
                 .and().authorizeRequests()
                 .antMatchers("/api/v1/auth/**").permitAll()
                 .antMatchers("/api/v1/tests/**").permitAll()
+                .antMatchers("/api/v1/trending").permitAll()
                 .antMatchers(HttpMethod.GET, "/api/v1/notes/**").permitAll()
                 .antMatchers(HttpMethod.GET, "/api/v1/comments/**").permitAll()
                 .anyRequest().authenticated();
