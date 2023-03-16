@@ -6,6 +6,8 @@ import com.david.express.model.Comment;
 import com.david.express.model.Note;
 import com.david.express.repository.NoteRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -19,6 +21,11 @@ public class NoteServiceImpl implements NoteService {
     @Override
     public List<Note> findAll() {
         return noteRepository.findAll();
+    }
+
+    @Override
+    public Page<Note> findAll(Pageable pageable) {
+        return noteRepository.findAll(pageable);
     }
 
     @Override
