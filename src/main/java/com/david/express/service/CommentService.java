@@ -9,7 +9,6 @@ import java.util.List;
 import java.util.Optional;
 
 public interface CommentService {
-    public List<Comment> findAll();
     public Page<Comment> findAll(Pageable pageable);
     public Optional<Comment> findCommentById(Long id) throws ResourceNotFoundException;
     public Comment save(Comment comment);

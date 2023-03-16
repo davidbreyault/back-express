@@ -18,11 +18,6 @@ public class CommentServiceImpl implements CommentService {
     private CommentRepository commentRepository;
 
     @Override
-    public List<Comment> findAll() {
-        return commentRepository.findAll();
-    }
-
-    @Override
     public Page<Comment> findAll(Pageable pageable) {
         return commentRepository.findAll(pageable);
     }
