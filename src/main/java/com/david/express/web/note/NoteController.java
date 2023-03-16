@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -38,9 +39,23 @@ public class NoteController {
     @GetMapping("")
     public ResponseEntity<Map<String, Object>> getAllNotes(
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "500") int size
+            @RequestParam(defaultValue = "500") int size,
+            @RequestParam(defaultValue = "id, asc") String[] sort
     ) {
-        Pageable paging = PageRequest.of(page, size);
+        // ?sort=column1,direction1 => array of 2 elements : [“column1”, “direction1”]
+        // ?sort=column1,direction1&sort=column2,direction2 => array of 2 elements : [“column1, direction1”, “column2, direction2”]
+        List<Sort.Order> orders = new ArrayList<>();
+        if (sort[0].contains(",")) {
+            // Tri selon plusieurs champs (sortOrder = "field, direction")
+            for (String sortOrder : sort) {
+                String[] _sort = sortOrder.split(",");
+                orders.add(new Sort.Order(Sort.Direction.fromString(_sort[1]), _sort[0]));
+            }
+        } else {
+            // Tri selon un seul champ (sortOrder = "field, direction")
+            orders.add(new Sort.Order(Sort.Direction.fromString(sort[1]), sort[0]));
+        }
+        Pageable paging = PageRequest.of(page, size, Sort.by(orders));
         Page<Note> pageNotes = noteService.findAll(paging);
         List<NoteDTO> notesDto = pageNotes.getContent()
                 .stream()
