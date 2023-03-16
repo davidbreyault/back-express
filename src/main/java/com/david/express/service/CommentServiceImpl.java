@@ -4,6 +4,8 @@ import com.david.express.exception.ResourceNotFoundException;
 import com.david.express.model.Comment;
 import com.david.express.repository.CommentRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -18,6 +20,11 @@ public class CommentServiceImpl implements CommentService {
     @Override
     public List<Comment> findAll() {
         return commentRepository.findAll();
+    }
+
+    @Override
+    public Page<Comment> findAll(Pageable pageable) {
+        return commentRepository.findAll(pageable);
     }
 
     @Override
