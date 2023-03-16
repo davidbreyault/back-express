@@ -10,6 +10,9 @@ import com.david.express.web.note.dto.NoteDTO;
 import com.david.express.web.note.dto.NoteResponseDTO;
 import com.david.express.web.note.mapper.NoteDTOMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -19,8 +22,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @RestController
@@ -34,17 +36,24 @@ public class NoteController {
     private UserService userService;
 
     @GetMapping("")
-    public ResponseEntity<NoteResponseDTO> getAllNotes() {
-        noteService.getTrendingWords();
-        List<NoteDTO> notes = noteService.findAll()
+    public ResponseEntity<Map<String, Object>> getAllNotes(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "500") int size
+    ) {
+        Pageable paging = PageRequest.of(page, size);
+        Page<Note> pageNotes = noteService.findAll(paging);
+        List<NoteDTO> notesDto = pageNotes.getContent()
                 .stream()
                 .map(NoteDTOMapper::toNoteDTO)
                 .collect(Collectors.toList());
-        NoteResponseDTO noteResponse = new NoteResponseDTO(
-                notes,
-                notes.size()
-        );
-        return ResponseEntity.ok(noteResponse);
+
+        Map<String, Object> response = new LinkedHashMap<>();
+        response.put("notes", notesDto);
+        response.put("currentPage", pageNotes.getNumber());
+        response.put("totalItems", pageNotes.getTotalElements());
+        response.put("totalPages", pageNotes.getTotalPages());
+        response.put("ts", System.currentTimeMillis());
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @GetMapping("/{id}")

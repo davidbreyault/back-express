@@ -17,7 +17,7 @@ import java.util.List;
 @RestController
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RequestMapping("/api/v1/talkers")
-public class Talker {
+public class TalkerController {
 
     @Autowired
     private UserService userService;
