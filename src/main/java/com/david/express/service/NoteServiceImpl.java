@@ -1,6 +1,5 @@
 package com.david.express.service;
 
-import com.david.express.common.Utils;
 import com.david.express.exception.ResourceNotFoundException;
 import com.david.express.model.Comment;
 import com.david.express.model.Note;
@@ -59,21 +58,5 @@ public class NoteServiceImpl implements NoteService {
             throw new ResourceNotFoundException("Note not found with id : " + id);
         }
         noteRepository.deleteById(note.get().getId());
-    }
-
-    @Override
-    public HashMap<String, Integer> getTrendingWords() {
-        List<Note> notes = findAll();
-        HashMap<String, Integer> trendingWords = new HashMap<String, Integer>();
-        notes.forEach(note ->
-                Arrays.stream(note.getNote().split("(\\s+)|([.,!?:;’'\"])")).forEach(word -> {
-                    if (word.length() > 2) {
-                        trendingWords.put(
-                                word,
-                                trendingWords.containsKey(word) ? (trendingWords.get(word) + 1) : 1);
-                    }
-                })
-        );
-        return Utils.sortHashMapByValue(trendingWords);
     }
 }
