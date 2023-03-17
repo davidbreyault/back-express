@@ -4,6 +4,7 @@ import com.david.express.exception.ResourceNotFoundException;
 import com.david.express.model.Comment;
 import com.david.express.model.Note;
 import com.david.express.repository.NoteRepository;
+import com.david.express.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -16,6 +17,8 @@ public class NoteServiceImpl implements NoteService {
 
     @Autowired
     private NoteRepository noteRepository;
+    @Autowired
+    private UserRepository userRepository;
 
     @Override
     public List<Note> findAll() {
@@ -34,6 +37,14 @@ public class NoteServiceImpl implements NoteService {
             throw new ResourceNotFoundException("Note not found with id : " + id);
         }
         return note;
+    }
+
+    @Override
+    public Page<Note> findNotesByUser(String username, Pageable pageable) throws ResourceNotFoundException {
+        if (!userRepository.existsByUsername(username)) {
+            throw new ResourceNotFoundException("User does not exist");
+        }
+        return noteRepository.findByUserUsername(username, pageable);
     }
 
     @Override

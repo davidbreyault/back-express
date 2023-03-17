@@ -13,6 +13,7 @@ public interface NoteService {
     public List<Note> findAll();
     public Page<Note> findAll(Pageable pageable);
     public Optional<Note> findNoteById(Long id) throws ResourceNotFoundException;
+    public Page<Note> findNotesByUser(String username, Pageable pageable) throws ResourceNotFoundException;
     public List<Comment> findNoteComments(Long id) throws ResourceNotFoundException;
     public Note save(Note note);
     public void deleteNoteById(Long id) throws ResourceNotFoundException;

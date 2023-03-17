@@ -10,10 +10,7 @@ import com.david.express.web.note.dto.NoteDTO;
 import com.david.express.web.note.dto.NoteResponseDTO;
 import com.david.express.web.note.mapper.NoteDTOMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -38,9 +35,10 @@ public class NoteController {
 
     @GetMapping("")
     public ResponseEntity<Map<String, Object>> getAllNotes(
+            @RequestParam(required = false) String username,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "500") int size,
-            @RequestParam(defaultValue = "id, asc") String[] sort
+            @RequestParam(defaultValue = "id, desc") String[] sort
     ) {
         // ?sort=column1,direction1 => array of 2 elements : [“column1”, “direction1”]
         // ?sort=column1,direction1&sort=column2,direction2 => array of 2 elements : [“column1, direction1”, “column2, direction2”]
@@ -55,8 +53,14 @@ public class NoteController {
             // Tri selon un seul champ (sortOrder = "field, direction")
             orders.add(new Sort.Order(Sort.Direction.fromString(sort[1]), sort[0]));
         }
+
         Pageable paging = PageRequest.of(page, size, Sort.by(orders));
-        Page<Note> pageNotes = noteService.findAll(paging);
+        Page<Note> pageNotes;
+        if (username == null) {
+            pageNotes = noteService.findAll(paging);
+        } else {
+            pageNotes = noteService.findNotesByUser(username, paging);
+        }
         List<NoteDTO> notesDto = pageNotes.getContent()
                 .stream()
                 .map(NoteDTOMapper::toNoteDTO)
