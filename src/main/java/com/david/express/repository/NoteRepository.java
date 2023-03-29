@@ -9,4 +9,5 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface NoteRepository extends JpaRepository<Note, Long> {
     Page<Note> findByUserUsername(String username, Pageable pageable);
+    Page<Note> findByUserUsernameContaining(String username, Pageable pageable);
 }

@@ -40,10 +40,7 @@ public class NoteServiceImpl implements NoteService {
     }
 
     @Override
-    public Page<Note> findNotesByUser(String username, Pageable pageable) throws ResourceNotFoundException {
-        if (!userRepository.existsByUsername(username)) {
-            throw new ResourceNotFoundException("User does not exist");
-        }
+    public Page<Note> findNotesByUser(String username, Pageable pageable) {
         return noteRepository.findByUserUsername(username, pageable);
     }
 
