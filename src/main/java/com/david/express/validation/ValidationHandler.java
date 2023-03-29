@@ -53,11 +53,11 @@ public class ValidationHandler extends ResponseEntityExceptionHandler {
     }
 
     @ExceptionHandler(value = ResourceNotFoundException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public @ResponseBody Map<String, ErrorResponseDTO> handleException(ResourceNotFoundException ex) {
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public @ResponseBody Map<String, ErrorResponseDTO> handleResourceNotFoundException(ResourceNotFoundException ex) {
         ErrorResponseDTO errors = new ErrorResponseDTO(
-                HttpStatus.BAD_REQUEST.getReasonPhrase(),
-                HttpStatus.BAD_REQUEST.value(),
+                HttpStatus.NOT_FOUND.getReasonPhrase(),
+                HttpStatus.NOT_FOUND.value(),
                 ex.getMessage()
         );
         return ErrorResponseBuilder.build(errors);
@@ -65,7 +65,7 @@ public class ValidationHandler extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler(value = UserNotResourceOwnerException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public @ResponseBody Map<String, ErrorResponseDTO> handleException(UserNotResourceOwnerException ex) {
+    public @ResponseBody Map<String, ErrorResponseDTO> handleUserNotResourceOwnerException(UserNotResourceOwnerException ex) {
         ErrorResponseDTO errors = new ErrorResponseDTO(
                 HttpStatus.BAD_REQUEST.getReasonPhrase(),
                 HttpStatus.BAD_REQUEST.value(),

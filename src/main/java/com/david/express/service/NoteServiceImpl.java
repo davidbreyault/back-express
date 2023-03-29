@@ -1,10 +1,10 @@
 package com.david.express.service;
 
-import com.david.express.common.Utils;
 import com.david.express.exception.ResourceNotFoundException;
 import com.david.express.model.Comment;
 import com.david.express.model.Note;
 import com.david.express.repository.NoteRepository;
+import com.david.express.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -17,6 +17,8 @@ public class NoteServiceImpl implements NoteService {
 
     @Autowired
     private NoteRepository noteRepository;
+    @Autowired
+    private UserRepository userRepository;
 
     @Override
     public List<Note> findAll() {
@@ -35,6 +37,11 @@ public class NoteServiceImpl implements NoteService {
             throw new ResourceNotFoundException("Note not found with id : " + id);
         }
         return note;
+    }
+
+    @Override
+    public Page<Note> findNotesByUser(String username, Pageable pageable) {
+        return noteRepository.findByUserUsername(username, pageable);
     }
 
     @Override
@@ -59,21 +66,5 @@ public class NoteServiceImpl implements NoteService {
             throw new ResourceNotFoundException("Note not found with id : " + id);
         }
         noteRepository.deleteById(note.get().getId());
-    }
-
-    @Override
-    public HashMap<String, Integer> getTrendingWords() {
-        List<Note> notes = findAll();
-        HashMap<String, Integer> trendingWords = new HashMap<String, Integer>();
-        notes.forEach(note ->
-                Arrays.stream(note.getNote().split("(\\s+)|([.,!?:;’'\"])")).forEach(word -> {
-                    if (word.length() > 2) {
-                        trendingWords.put(
-                                word,
-                                trendingWords.containsKey(word) ? (trendingWords.get(word) + 1) : 1);
-                    }
-                })
-        );
-        return Utils.sortHashMapByValue(trendingWords);
     }
 }
