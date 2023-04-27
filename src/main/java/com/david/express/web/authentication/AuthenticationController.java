@@ -1,11 +1,10 @@
 package com.david.express.web.authentication;
 
-import com.david.express.model.User;
-import com.david.express.repository.UserRepository;
+import com.david.express.exception.ResourceAlreadyExistsException;
+import com.david.express.entity.User;
 import com.david.express.security.jwt.JwtUtils;
-import com.david.express.service.RoleService;
-import com.david.express.validation.ErrorResponseBuilder;
-import com.david.express.validation.dto.ErrorResponseDTO;
+import com.david.express.service.impl.RoleServiceImpl;
+import com.david.express.service.UserService;
 import com.david.express.validation.dto.SuccessResponseDTO;
 import com.david.express.web.authentication.dto.request.RegistrationRequestDTO;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,21 +25,22 @@ import java.util.*;
 
 @RestController
 @CrossOrigin(origins = "*", maxAge = 3600)
-@RequestMapping("/api/v1/auth")
+@RequestMapping("/auth")
 public class AuthenticationController {
 
     @Autowired
     private AuthenticationManager authenticationManager;
     @Autowired
-    private UserRepository userRepository;
+    private UserService userService;
     @Autowired
     private PasswordEncoder passwordEncoder;
     @Autowired
-    private RoleService roleService;
+    private RoleServiceImpl roleService;
     @Autowired
     private JwtUtils jwtUtils;
 
     @PostMapping("/authenticate")
+    @ResponseStatus(value = HttpStatus.OK)
     public ResponseEntity<?> authenticate(HttpServletRequest request) {
         // Récupération des identifiants dans la requête
         final String authorization = request.getHeader("Authorization");
@@ -70,37 +70,25 @@ public class AuthenticationController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<?> register(@Valid @RequestBody RegistrationRequestDTO registrationRequest) {
+    @ResponseStatus(value = HttpStatus.CREATED)
+    public ResponseEntity<SuccessResponseDTO> register(@Valid @RequestBody RegistrationRequestDTO registrationRequest) {
         // Vérification disponibilité du nom d'utilisateur
-        if (userRepository.existsByUsername(registrationRequest.getUsername())) {
-            ErrorResponseDTO errors = new ErrorResponseDTO(
-                    HttpStatus.BAD_REQUEST.getReasonPhrase(),
-                    HttpStatus.BAD_REQUEST.value(),
-                    "Username is already in use !"
-            );
-            return ResponseEntity
-                    .badRequest()
-                    .body(ErrorResponseBuilder.build(errors));
+        if (userService.existsByUsername(registrationRequest.getUsername())) {
+            throw new ResourceAlreadyExistsException("Username " + registrationRequest.getUsername() + " is already in use !");
         }
         // Vérification disponibilité de l'adresse email
-        if (userRepository.existsByEmail(registrationRequest.getEmail())) {
-            ErrorResponseDTO errors = new ErrorResponseDTO(
-                    HttpStatus.BAD_REQUEST.getReasonPhrase(),
-                    HttpStatus.BAD_REQUEST.value(),
-                    "Email is already in use !"
-            );
-            return ResponseEntity
-                    .badRequest()
-                    .body(ErrorResponseBuilder.build((errors)));
+        if (userService.existsByEmail(registrationRequest.getEmail())) {
+            throw new ResourceAlreadyExistsException("Email " + registrationRequest.getEmail() + " is already in use !");
         }
         // Création du compte utilisateur
-        User user = User.builder()
-                .username(registrationRequest.getUsername())
-                .email(registrationRequest.getEmail())
-                .password(passwordEncoder.encode(registrationRequest.getPassword()))
-                .roles(roleService.rolesAssignmentByRegistration())
-                .build();
-        userRepository.save(user);
-        return ResponseEntity.ok(new SuccessResponseDTO("User registered successfully!"));
+        User user = userService.saveUser(
+                User.builder()
+                        .username(registrationRequest.getUsername())
+                        .email(registrationRequest.getEmail())
+                        .password(passwordEncoder.encode(registrationRequest.getPassword()))
+                        .roles(roleService.rolesAssignmentByRegistration())
+                        .build()
+        );
+        return new ResponseEntity<>(new SuccessResponseDTO("User registered successfully!"), HttpStatus.CREATED);
     }
 }

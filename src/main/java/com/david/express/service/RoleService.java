@@ -1,62 +1,12 @@
 package com.david.express.service;
 
-import com.david.express.model.Role;
-import com.david.express.model.RoleEnum;
-import com.david.express.repository.RoleRepository;
-import com.david.express.repository.UserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
+import com.david.express.entity.Role;
 
-import java.util.HashSet;
 import java.util.Set;
 
-@Service
-public class RoleService {
+public interface RoleService {
 
-    @Autowired
-    private UserRepository userRepository;
-    @Autowired
-    private RoleRepository roleRepository;
-
-    public Set<Role> rolesAssignmentByRegistration() {
-        // Par défaut, l'inscription donne accès au ROLE_WRITER
-        Set<Role> roles = new HashSet<>();
-        Role userRole = roleRepository.findByName(RoleEnum.ROLE_READER)
-                .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
-        Role writerRole = roleRepository.findByName(RoleEnum.ROLE_WRITER)
-                .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
-        roles.add(userRole);
-        roles.add(writerRole);
-        return roles;
-    }
-
-    public Set<Role> rolesAssignmentByAdmin(Set<String> strRoles) {
-        // Attribution des rôles choisi par un utilisateur ayant le rôle d'administrateur
-        Set<Role> roles = new HashSet<>();
-        if (strRoles == null) {
-            Role userRole = roleRepository.findByName(RoleEnum.ROLE_READER)
-                    .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
-            roles.add(userRole);
-        } else {
-            strRoles.forEach(role -> {
-                switch (role) {
-                    case "admin":
-                        Role adminRole = roleRepository.findByName(RoleEnum.ROLE_ADMIN)
-                                .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
-                        roles.add(adminRole);
-                        break;
-                    case "writer":
-                        Role writerRole = roleRepository.findByName(RoleEnum.ROLE_WRITER)
-                                .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
-                        roles.add(writerRole);
-                        break;
-                    default:
-                        Role readerRole = roleRepository.findByName(RoleEnum.ROLE_READER)
-                                .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
-                        roles.add(readerRole);
-                }
-            });
-        }
-        return roles;
-    }
+    Set<Role> rolesAssignmentByRegistration();
+    Set<Role> rolesAssignmentByAdmin(Set<String> strRoles);
+    boolean isLoggedUserHasAdminRole();
 }

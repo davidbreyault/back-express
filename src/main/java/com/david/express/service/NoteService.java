@@ -1,20 +1,24 @@
 package com.david.express.service;
 
+import com.david.express.exception.ResourceAffiliationException;
 import com.david.express.exception.ResourceNotFoundException;
-import com.david.express.model.Comment;
-import com.david.express.model.Note;
+import com.david.express.entity.Comment;
+import com.david.express.entity.Note;
+import com.david.express.web.note.dto.NoteDTO;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 import java.util.List;
-import java.util.Optional;
 
 public interface NoteService {
-    public List<Note> findAll();
-    public Page<Note> findAll(Pageable pageable);
-    public Optional<Note> findNoteById(Long id) throws ResourceNotFoundException;
-    public Page<Note> findNotesByUser(String username, Pageable pageable);
-    public List<Comment> findNoteComments(Long id) throws ResourceNotFoundException;
-    public Note save(Note note);
-    public void deleteNoteById(Long id) throws ResourceNotFoundException;
+    Page<Note> findAllNotes(Pageable pageable);
+    Note findNoteById(Long id) throws ResourceNotFoundException;
+    Page<Note> findNotesByUsername(String username, Pageable pageable);
+    List<Comment> findNoteComments(Long id) throws ResourceNotFoundException;
+    Note saveNote(NoteDTO noteDto);
+    Note updateNote(Long id, NoteDTO noteDto) throws ResourceNotFoundException, ResourceAffiliationException;
+    void deleteNoteById(Long id) throws ResourceNotFoundException, ResourceAffiliationException;
+    Note likeNote(Long id) throws ResourceNotFoundException;
+    Note dislikeNote(Long id) throws ResourceNotFoundException;
+    boolean isLoggedUserIsNoteOwner(Long id);
 }

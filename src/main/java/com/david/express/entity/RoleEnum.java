@@ -1,4 +1,4 @@
-package com.david.express.model;
+package com.david.express.entity;
 
 public enum RoleEnum {
     ROLE_READER,

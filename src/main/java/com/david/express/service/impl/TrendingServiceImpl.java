@@ -1,8 +1,9 @@
-package com.david.express.service;
+package com.david.express.service.impl;
 
 import com.david.express.common.Utils;
-import com.david.express.model.Note;
+import com.david.express.entity.Note;
 import com.david.express.repository.NoteRepository;
+import com.david.express.service.TrendingService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @CrossOrigin(origins = "*", maxAge = 3600)
-@RequestMapping("/api/v1/trending")
+@RequestMapping("/trending")
 public class TrendingController {
 
     @Autowired

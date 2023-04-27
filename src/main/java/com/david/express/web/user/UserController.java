@@ -1,40 +1,30 @@
 package com.david.express.web.user;
 
-import com.david.express.model.Role;
-import com.david.express.model.User;
-import com.david.express.repository.UserRepository;
-import com.david.express.service.RoleService;
+import com.david.express.entity.User;
 import com.david.express.service.UserService;
-import com.david.express.validation.dto.SuccessResponseDTO;
 import com.david.express.web.user.dto.UserDTO;
 import com.david.express.web.user.dto.UserResponseDTO;
 import com.david.express.web.user.dto.UserUpdateDTO;
 import com.david.express.web.user.mapper.UserDTOMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/api/v1/users")
+@RequestMapping("/users")
 public class UserController {
 
     @Autowired
     private UserService userService;
-    @Autowired
-    private RoleService roleService;
-    @Autowired
-    private UserRepository userRepository;
-    @Autowired
-    PasswordEncoder passwordEncoder;
 
     @GetMapping("")
+    @ResponseStatus(value = HttpStatus.OK)
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<UserResponseDTO> getAllUsers() {
         List<UserDTO> users = userService
@@ -46,34 +36,26 @@ public class UserController {
     }
 
     @GetMapping("/{id}")
+    @ResponseStatus(value = HttpStatus.OK)
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<UserDTO> getUserById(@PathVariable Long id) {
         User user = userService.findUserById(id);
-        System.out.println(user.getUsername());
         return ResponseEntity.ok(UserDTOMapper.toUserDTO(user));
     }
 
     @PutMapping("/{id}")
+    @ResponseStatus(value = HttpStatus.OK)
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<SuccessResponseDTO> updateUserById(
-            @PathVariable Long id,
-            @Valid @RequestBody UserUpdateDTO user) {
-        User userToUpdate = userService.findUserById(id);
-        userToUpdate.setUsername(user.getUsername());
-        userToUpdate.setEmail(user.getEmail());
-        userToUpdate.setPassword(passwordEncoder.encode(user.getPassword()));
-        userToUpdate.setRoles(null);
-        Set<Role> roles = roleService.rolesAssignmentByAdmin(user.getRoles());
-        userToUpdate.setRoles(roles);
-        userRepository.save(userToUpdate);
-        return ResponseEntity.ok(new SuccessResponseDTO("User has been updated successfully !"));
+    public ResponseEntity<UserDTO> updateUser(@PathVariable Long id, @Valid @RequestBody UserUpdateDTO userUpdateDto) {
+        User user = userService.updateUser(id, userUpdateDto);
+        return ResponseEntity.ok(UserDTOMapper.toUserDTO(user));
     }
 
     @DeleteMapping("/{id}")
+    @ResponseStatus(value = HttpStatus.NO_CONTENT)
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<SuccessResponseDTO> deleteUserById(@PathVariable Long id) {
-        User user = userService.findUserById(id);
-        userService.deleteUserById(user.getId());
-        return ResponseEntity.ok(new SuccessResponseDTO("User has been deleted successfully !"));
+    public ResponseEntity<HttpStatus> deleteUser(@PathVariable Long id) {
+        userService.deleteUserById(id);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 }

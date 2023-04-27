@@ -1,4 +1,4 @@
-package com.david.express.model;
+package com.david.express.entity;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.*;

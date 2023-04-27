@@ -14,7 +14,7 @@ import java.util.Set;
 @AllArgsConstructor
 public class UserUpdateDTO {
 
-    @NotBlank(message = "Username is required.")
+    @NotBlank(message = "Username must not be empty.")
     @Size(min = 3, max = 20, message = "Username must be 3-20 characters long.")
     private String username;
 
@@ -23,8 +23,8 @@ public class UserUpdateDTO {
     @Email(message = "Please add a valid email.")
     private String email;
 
-    @NotBlank(message = "Password is required.")
-    @Size(min = 6, max = 40, message = "Username must be 6-40 characters long.")
+    @NotBlank(message = "Password must not be empty.")
+    @Size(min = 6, max = 40, message = "Password must be 6-40 characters long.")
     private String password;
 
     private Set<String> roles;
