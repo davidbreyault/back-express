@@ -1,10 +1,9 @@
 package com.david.express.security;
 
-import com.david.express.repository.CommentRepository;
-import com.david.express.security.jwt.AuthenticationEntryPointHandler;
 import com.david.express.security.jwt.AuthenticationTokenFilter;
 import com.david.express.security.service.UserDetailsServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -16,6 +15,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
@@ -33,9 +33,35 @@ public class WebSecurityConfiguration {
     private UserDetailsServiceImpl userDetailsService;
 
     @Autowired
-    private AuthenticationEntryPointHandler unauthorizedPointHandler;
-    @Autowired
-    private CommentRepository commentRepository;
+    @Qualifier("authenticationEntryPointHandler")
+    private AuthenticationEntryPoint authenticationEntryPoint;
+
+    @Bean
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+        http
+                .csrf().disable()
+                .authorizeRequests()
+                .antMatchers("/auth/**").permitAll()
+                .antMatchers("/talkers").permitAll()
+                .antMatchers("/trending").permitAll()
+                .antMatchers(HttpMethod.GET, "/notes/**").permitAll()
+                .antMatchers(HttpMethod.GET, "/comments/**").permitAll()
+                .antMatchers(HttpMethod.GET, "/tests/**").permitAll()
+                .anyRequest().authenticated()
+                .and().sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                .and().exceptionHandling().authenticationEntryPoint(authenticationEntryPoint);
+
+        http.cors();
+        //http.authenticationProvider(authenticationProvider());
+        http.addFilterBefore(authenticationJwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);
+        http.httpBasic();
+        return http.build();
+    }
+
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
 
     @Bean
     public AuthenticationTokenFilter authenticationJwtTokenFilter() {
@@ -56,11 +82,6 @@ public class WebSecurityConfiguration {
     }
 
     @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
-
-    @Bean
     CorsConfigurationSource corsConfigurationSource() {
         final UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         CorsConfiguration config = new CorsConfiguration();
@@ -69,26 +90,5 @@ public class WebSecurityConfiguration {
         config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE"));
         config.setExposedHeaders(Collections.singletonList("Authorization"));
         return source;
-    }
-
-    @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http
-                .csrf().disable()
-                .exceptionHandling().authenticationEntryPoint(unauthorizedPointHandler)
-                .and().sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-                .and().authorizeRequests()
-                .antMatchers("/api/v1/auth/**").permitAll()
-                .antMatchers("/api/v1/tests/**").permitAll()
-                .antMatchers("/api/v1/talkers").permitAll()
-                .antMatchers("/api/v1/trending").permitAll()
-                .antMatchers(HttpMethod.GET, "/api/v1/notes/**").permitAll()
-                .antMatchers(HttpMethod.GET, "/api/v1/comments/**").permitAll()
-                .anyRequest().authenticated();
-
-        http.cors();
-        http.authenticationProvider(authenticationProvider());
-        http.addFilterBefore(authenticationJwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);
-        return http.build();
     }
 }

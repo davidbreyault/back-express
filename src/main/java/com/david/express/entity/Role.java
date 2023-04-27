@@ -1,4 +1,4 @@
-package com.david.express.model;
+package com.david.express.entity;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

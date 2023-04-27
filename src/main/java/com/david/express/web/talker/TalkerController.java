@@ -1,6 +1,6 @@
 package com.david.express.web.talker;
 
-import com.david.express.model.User;
+import com.david.express.entity.User;
 import com.david.express.service.UserService;
 import com.david.express.web.talker.dto.ActivityDTO;
 import com.david.express.web.talker.dto.TalkerResponseDTO;
@@ -16,7 +16,7 @@ import java.util.List;
 
 @RestController
 @CrossOrigin(origins = "*", maxAge = 3600)
-@RequestMapping("/api/v1/talkers")
+@RequestMapping("/talkers")
 public class TalkerController {
 
     @Autowired

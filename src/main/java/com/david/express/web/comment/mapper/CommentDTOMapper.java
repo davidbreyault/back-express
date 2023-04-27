@@ -1,6 +1,6 @@
 package com.david.express.web.comment.mapper;
 
-import com.david.express.model.Comment;
+import com.david.express.entity.Comment;
 import com.david.express.web.comment.dto.CommentDTO;
 
 public class CommentDTOMapper {

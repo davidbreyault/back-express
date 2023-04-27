@@ -1,6 +1,6 @@
 package com.david.express.security.service;
 
-import com.david.express.model.User;
+import com.david.express.entity.User;
 import com.david.express.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;

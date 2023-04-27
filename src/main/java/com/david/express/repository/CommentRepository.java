@@ -1,6 +1,6 @@
 package com.david.express.repository;
 
-import com.david.express.model.Comment;
+import com.david.express.entity.Comment;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

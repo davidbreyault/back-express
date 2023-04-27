@@ -1,6 +1,6 @@
 package com.david.express.web.user.mapper;
 
-import com.david.express.model.User;
+import com.david.express.entity.User;
 import com.david.express.web.user.dto.UserDTO;
 
 public class UserDTOMapper {

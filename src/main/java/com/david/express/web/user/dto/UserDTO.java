@@ -1,6 +1,6 @@
 package com.david.express.web.user.dto;
 
-import com.david.express.model.Role;
+import com.david.express.entity.Role;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
