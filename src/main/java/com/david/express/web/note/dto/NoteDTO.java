@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
 import java.time.LocalDateTime;
+import java.util.Date;
 
 @Data
 @RequiredArgsConstructor
@@ -23,7 +24,7 @@ public class NoteDTO {
     private String author;
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
-    private LocalDateTime createdAt;
+    private Date createdAt;
 
     private int likes;
     private int dislikes;
