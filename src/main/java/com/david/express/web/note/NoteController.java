@@ -13,6 +13,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.sql.Date;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -27,6 +28,9 @@ public class NoteController {
     @GetMapping("")
     public ResponseEntity<Map<String, Object>> getAllNotes(
             @RequestParam(required = false) String username,
+            @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) Date dateStart,
+            @RequestParam(required = false) Date dateEnd,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "500") int size,
             @RequestParam(defaultValue = "id, desc") String[] sort
@@ -46,11 +50,12 @@ public class NoteController {
         }
 
         Pageable paging = PageRequest.of(page, size, Sort.by(orders));
-        Page<Note> pageNotes;
-        if (username == null) {
+        Page<Note> pageNotes = null;
+        if (username != null || keyword != null || dateStart != null || dateEnd != null) {
+            pageNotes = noteService.findByCriteria(username, keyword, dateStart, dateEnd, paging);
+        }
+        if (pageNotes == null) {
             pageNotes = noteService.findAllNotes(paging);
-        } else {
-            pageNotes = noteService.findNotesByUsername(username, paging);
         }
         List<NoteDTO> notesDto = pageNotes.getContent()
                 .stream()

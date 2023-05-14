@@ -14,7 +14,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
+import java.sql.Date;
 import java.util.*;
 
 @Service
@@ -38,8 +38,14 @@ public class NoteServiceImpl implements NoteService {
     }
 
     @Override
-    public Page<Note> findNotesByUsername(String username, Pageable pageable) {
-        return noteRepository.findByUserUsername(username, pageable);
+    public Page<Note> findByCriteria(String username, String keyword, Date dateStart, Date dateEnd, Pageable pageable) {
+        if (dateStart == null) {
+            dateStart = new Date(0);
+        }
+        if (dateEnd == null) {
+            dateEnd = new Date(System.currentTimeMillis());
+        }
+        return noteRepository.findByCriteria(username, keyword, dateStart, dateEnd, pageable);
     }
 
     @Override
@@ -55,7 +61,7 @@ public class NoteServiceImpl implements NoteService {
                 .note(noteDto.getNote())
                 .likes(0)
                 .dislikes(0)
-                .createdAt(LocalDateTime.now())
+                .createdAt(new Date(System.currentTimeMillis()))
                 .user(userService.getLoggedInUser())
                 .build();
         return noteRepository.save(note);
