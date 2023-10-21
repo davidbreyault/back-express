@@ -26,7 +26,7 @@ public class NoteController {
     private NoteService noteService;
 
     @GetMapping("")
-    public ResponseEntity<Map<String, Object>> getAllNotes(
+    public ResponseEntity<Map<String, Object>> getNotes(
             @RequestParam(required = false) String username,
             @RequestParam(required = false) String keyword,
             @RequestParam(required = false) Date dateStart,

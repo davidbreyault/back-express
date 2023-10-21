@@ -20,7 +20,7 @@ public class TrendingServiceImpl implements TrendingService {
         List<Note> notes = noteRepository.findAll();
         HashMap<String, Integer> trendingWords = new HashMap<String, Integer>();
         notes.forEach(note ->
-                Arrays.stream(note.getNote().split("(\\s+)|([.,!?:;’'\"])")).forEach(word -> {
+                Arrays.stream(note.getNote().split("(\\s+)|([-.,!?:()_+=;’'°\"])")).forEach(word -> {
                     if (word.length() > 2) {
                         trendingWords.put(
                                 word,

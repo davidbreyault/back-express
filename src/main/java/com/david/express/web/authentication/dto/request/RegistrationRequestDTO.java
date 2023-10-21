@@ -1,7 +1,6 @@
 package com.david.express.web.authentication.dto.request;
 
-import lombok.Data;
-import lombok.RequiredArgsConstructor;
+import lombok.*;
 
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;

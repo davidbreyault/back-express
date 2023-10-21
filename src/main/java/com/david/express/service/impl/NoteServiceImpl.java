@@ -84,7 +84,7 @@ public class NoteServiceImpl implements NoteService {
                     ? userService.findUserByUsername(noteDto.getAuthor())
                     : noteToUpdate.getUser());
         } else {
-            // Si non, vérifier que la note à supprimer appartient bien à l'utilisateur connecté
+            // Si non, vérifier que la note à modifier appartient bien à l'utilisateur connecté
             if (!isLoggedUserIsNoteOwner(id)) {
                 throw new ResourceAffiliationException("You are not allowed to update this resource !");
             }
