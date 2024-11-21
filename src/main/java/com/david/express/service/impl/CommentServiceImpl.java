@@ -16,7 +16,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.Optional;
 
 @Service
@@ -54,7 +54,7 @@ public class CommentServiceImpl implements CommentService {
         String username = userDetails.getUsername();
         Comment comment = Comment.builder()
                 .message(commentDto.getMessage())
-                .createdAt(LocalDateTime.now())
+                .createdAt(new Date(System.currentTimeMillis()))
                 .user(userService.findUserByUsername(username))
                 .note(noteService.findNoteById(noteId))
                 .build();

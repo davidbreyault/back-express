@@ -14,6 +14,6 @@ public interface NoteRepository extends JpaRepository<Note, Long> {
     @Query("SELECT n FROM Note n WHERE" +
             "(?1 is null OR n.user.username = ?1)\n" +
             "AND (?2 is null OR n.note LIKE %?2%)\n" +
-            "AND (?3 is null OR n.createdAt BETWEEN ?3 AND ?4)")
+            "AND (?3 is null OR ?4 is null OR n.createdAt BETWEEN ?3 AND ?4)")
     Page<Note> findByCriteria(String username, String keyword, Date dateStart, Date dateEnd, Pageable pageable);
 }

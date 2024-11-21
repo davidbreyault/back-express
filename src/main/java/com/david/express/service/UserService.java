@@ -2,6 +2,7 @@ package com.david.express.service;
 
 import com.david.express.exception.ResourceNotFoundException;
 import com.david.express.entity.User;
+import com.david.express.web.user.dto.UserDTO;
 import com.david.express.web.user.dto.UserUpdateDTO;
 
 import java.util.List;

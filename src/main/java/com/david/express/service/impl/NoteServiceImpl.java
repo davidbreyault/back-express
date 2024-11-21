@@ -11,7 +11,9 @@ import com.david.express.service.UserService;
 import com.david.express.web.note.dto.NoteDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.sql.Date;
@@ -38,14 +40,35 @@ public class NoteServiceImpl implements NoteService {
     }
 
     @Override
-    public Page<Note> findByCriteria(String username, String keyword, Date dateStart, Date dateEnd, Pageable pageable) {
-        if (dateStart == null) {
-            dateStart = new Date(0);
+    public Page<Note> getNotes(String username, String keyword, Date dateStart, Date dateEnd, int page, int size, String[] sort) {
+        // ?sort=column1,direction1 => array of 2 elements : [“column1”, “direction1”]
+        // ?sort=column1,direction1&sort=column2,direction2 => array of 2 elements : [“column1, direction1”, “column2, direction2”]
+        List<Sort.Order> orders = new ArrayList<>();
+        if (sort[0].contains(",")) {
+            // Tri selon plusieurs champs (sortOrder = "field, direction")
+            for (String sortOrder : sort) {
+                String[] _sort = sortOrder.split(",");
+                orders.add(new Sort.Order(Sort.Direction.fromString(_sort[1]), _sort[0]));
+            }
+        } else {
+            // Tri selon un seul champ (sortOrder = "field, direction")
+            orders.add(new Sort.Order(Sort.Direction.fromString(sort[1]), sort[0]));
         }
-        if (dateEnd == null) {
-            dateEnd = new Date(System.currentTimeMillis());
+
+        Page<Note> pageNotes = null;
+        Pageable paging = PageRequest.of(page, size, Sort.by(orders));
+
+        if (username != null || keyword != null || dateStart != null || dateEnd != null) {
+            dateStart = Optional.ofNullable(dateStart).orElse(new Date(0));
+            dateEnd = Optional.ofNullable(dateEnd).orElse(new Date(System.currentTimeMillis()));
+            pageNotes = noteRepository.findByCriteria(username, keyword, dateStart, dateEnd, paging);
         }
-        return noteRepository.findByCriteria(username, keyword, dateStart, dateEnd, pageable);
+
+        if (pageNotes == null) {
+            pageNotes = findAllNotes(paging);
+        }
+
+        return pageNotes;
     }
 
     @Override
@@ -57,13 +80,13 @@ public class NoteServiceImpl implements NoteService {
     @Override
     public Note saveNote(NoteDTO noteDto) {
         Note note = Note
-                .builder()
-                .note(noteDto.getNote())
-                .likes(0)
-                .dislikes(0)
-                .createdAt(new Date(System.currentTimeMillis()))
-                .user(userService.getLoggedInUser())
-                .build();
+            .builder()
+            .note(noteDto.getNote())
+            .likes(0)
+            .dislikes(0)
+            .createdAt(new Date(System.currentTimeMillis()))
+            .user(userService.getLoggedInUser())
+            .build();
         return noteRepository.save(note);
     }
 
@@ -73,16 +96,20 @@ public class NoteServiceImpl implements NoteService {
         // Si l'utilisateur connecté possède le role admin, possibilité de modifier n'importe quelle note
         if (roleService.isLoggedUserHasAdminRole()) {
             noteToUpdate.setNote(noteDto.getNote() != null
-                    ? noteDto.getNote() : noteToUpdate.getNote());
+                ? noteDto.getNote()
+                : noteToUpdate.getNote());
             noteToUpdate.setCreatedAt(noteDto.getCreatedAt() != null
-                    ? noteDto.getCreatedAt() : noteToUpdate.getCreatedAt());
+                ? noteDto.getCreatedAt()
+                : noteToUpdate.getCreatedAt());
             noteToUpdate.setLikes(Optional.of(noteDto.getLikes()).orElse(0) != 0
-                    ? noteDto.getLikes() : noteToUpdate.getLikes());
+                ? noteDto.getLikes()
+                : noteToUpdate.getLikes());
             noteToUpdate.setDislikes(Optional.of(noteDto.getDislikes()).orElse(0) != 0
-                    ? noteDto.getDislikes() : noteToUpdate.getDislikes());
+                ? noteDto.getDislikes()
+                : noteToUpdate.getDislikes());
             noteToUpdate.setUser(noteDto.getAuthor() != null
-                    ? userService.findUserByUsername(noteDto.getAuthor())
-                    : noteToUpdate.getUser());
+                ? userService.findUserByUsername(noteDto.getAuthor())
+                : noteToUpdate.getUser());
         } else {
             // Si non, vérifier que la note à modifier appartient bien à l'utilisateur connecté
             if (!isLoggedUserIsNoteOwner(id)) {
@@ -126,7 +153,15 @@ public class NoteServiceImpl implements NoteService {
         return noteRepository.save(note);
     }
 
+    /**
+     *
+     * @param id L'id de la note
+     * @return True ou False en fonction de si la note a été posté par l'utilisateur connecté
+     */
     @Override
+    // isLoggedUserPost ?
+    // isLoggedUserPost ?
+    // isLoggedUserPost ?
     public boolean isLoggedUserIsNoteOwner(Long id) {
         Note note = findNoteById(id);
         return note.getUser().getUsername().equals(userService.getLoggedInUser().getUsername());
