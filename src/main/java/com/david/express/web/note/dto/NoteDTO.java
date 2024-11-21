@@ -20,7 +20,6 @@ public class NoteDTO {
     @NotBlank
     @Size(min = 10, max = 255, message = "Note must be 10-255 characters long.")
     private String note;
-
     private String author;
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")

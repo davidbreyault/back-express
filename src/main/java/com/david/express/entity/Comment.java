@@ -6,7 +6,7 @@ import lombok.*;
 import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
-import java.time.LocalDateTime;
+import java.util.Date;
 
 @Entity
 @Table(name = "app_comment")
@@ -27,7 +27,7 @@ public class Comment {
 
     @Column(name = "created_at")
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
-    private LocalDateTime createdAt;
+    private Date createdAt;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "app_note_id", nullable = false)

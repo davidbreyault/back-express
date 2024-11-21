@@ -27,8 +27,7 @@ public class UserController {
     @ResponseStatus(value = HttpStatus.OK)
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<UserResponseDTO> getAllUsers() {
-        List<UserDTO> users = userService
-                .findAllUsers()
+        List<UserDTO> users = userService.findAllUsers()
                 .stream()
                 .map(UserDTOMapper::toUserDTO)
                 .collect(Collectors.toList());

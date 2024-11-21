@@ -12,9 +12,9 @@ import java.sql.Date;
 import java.util.List;
 
 public interface NoteService {
-    Page<Note> findAllNotes(Pageable pageable);
     Note findNoteById(Long id) throws ResourceNotFoundException;
-    Page<Note> findByCriteria(String username, String keyword, Date dateStart, Date dateEnd, Pageable pageable);
+    Page<Note> findAllNotes(Pageable pageable);
+    Page<Note> getNotes(String username, String keyword, Date dateStart, Date dateEnd, int page, int size, String[] sort);
     List<Comment> findNoteComments(Long id) throws ResourceNotFoundException;
     Note saveNote(NoteDTO noteDto);
     Note updateNote(Long id, NoteDTO noteDto) throws ResourceNotFoundException, ResourceAffiliationException;

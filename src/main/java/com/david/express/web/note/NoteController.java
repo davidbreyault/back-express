@@ -35,38 +35,20 @@ public class NoteController {
             @RequestParam(defaultValue = "500") int size,
             @RequestParam(defaultValue = "id, desc") String[] sort
     ) {
-        // ?sort=column1,direction1 => array of 2 elements : [“column1”, “direction1”]
-        // ?sort=column1,direction1&sort=column2,direction2 => array of 2 elements : [“column1, direction1”, “column2, direction2”]
-        List<Sort.Order> orders = new ArrayList<>();
-        if (sort[0].contains(",")) {
-            // Tri selon plusieurs champs (sortOrder = "field, direction")
-            for (String sortOrder : sort) {
-                String[] _sort = sortOrder.split(",");
-                orders.add(new Sort.Order(Sort.Direction.fromString(_sort[1]), _sort[0]));
-            }
-        } else {
-            // Tri selon un seul champ (sortOrder = "field, direction")
-            orders.add(new Sort.Order(Sort.Direction.fromString(sort[1]), sort[0]));
-        }
+        Page<Note> pageNotes = noteService.getNotes(username, keyword, dateStart, dateEnd, page, size, sort);
 
-        Pageable paging = PageRequest.of(page, size, Sort.by(orders));
-        Page<Note> pageNotes = null;
-        if (username != null || keyword != null || dateStart != null || dateEnd != null) {
-            pageNotes = noteService.findByCriteria(username, keyword, dateStart, dateEnd, paging);
-        }
-        if (pageNotes == null) {
-            pageNotes = noteService.findAllNotes(paging);
-        }
-        List<NoteDTO> notesDto = pageNotes.getContent()
-                .stream()
-                .map(NoteDTOMapper::toNoteDTO)
-                .collect(Collectors.toList());
+        List<NoteDTO> notesDto = Optional.ofNullable(pageNotes)
+            .map(Page::getContent)
+            .orElseGet(Collections::emptyList)
+            .stream()
+            .map(NoteDTOMapper::toNoteDTO)
+            .collect(Collectors.toList());
 
         Map<String, Object> response = new LinkedHashMap<>();
         response.put("notes", notesDto);
-        response.put("currentPage", pageNotes.getNumber());
-        response.put("totalItems", pageNotes.getTotalElements());
-        response.put("totalPages", pageNotes.getTotalPages());
+        response.put("currentPage", Optional.ofNullable(pageNotes).map(Page::getNumber).orElse(0));
+        response.put("totalItems", Optional.ofNullable(pageNotes).map(Page::getTotalElements).orElse(0L));
+        response.put("totalPages", Optional.ofNullable(pageNotes).map(Page::getTotalPages).orElse(0));
         response.put("ts", System.currentTimeMillis());
         return new ResponseEntity<>(response, HttpStatus.OK);
     }

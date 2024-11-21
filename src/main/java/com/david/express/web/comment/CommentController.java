@@ -72,7 +72,7 @@ public class CommentController {
     @PreAuthorize("hasRole('WRITER')")
     public ResponseEntity<CommentDTO> postComment(@PathVariable Long id, @Valid @RequestBody CommentDTO commentDto) {
         Comment comment = commentService.save(id, commentDto);
-        return new ResponseEntity<>(commentDto, HttpStatus.CREATED);
+        return new ResponseEntity<>(CommentDTOMapper.toCommentDTO(comment), HttpStatus.CREATED);
     }
 
     @PutMapping("/comments/{id}")

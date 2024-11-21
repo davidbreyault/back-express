@@ -22,7 +22,5 @@ public class Role {
     private Integer id;
 
     @Enumerated(value = EnumType.STRING)
-    @NotBlank
-    @Size(max = 20)
     private RoleEnum name;
 }
