@@ -8,6 +8,7 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 
 @Entity
 @Table(name = "app_note")
@@ -26,9 +27,6 @@ public class Note {
     @Size(min = 3, max = 255)
     private String note;
 
-    private int likes;
-    private int dislikes;
-
     @Column(name = "created_at")
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
     private Date createdAt;
@@ -37,14 +35,23 @@ public class Note {
     @JoinColumn(name = "app_user_id", nullable = false)
     private User user;
 
+    @OneToMany(mappedBy = "note", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<Like> likes;
+
     @OneToMany(mappedBy = "note", cascade = CascadeType.ALL)
     private List<Comment> comments;
 
-    public void like() {
-        setLikes(getLikes() + 1);
+    public void addLike(Like like) {
+        likes.add(like);
+        // Associer le Like à cette Note
+        like.setNote(this);
+        like.setUser(like.getUser());
     }
 
-    public void dislike() {
-        setDislikes(getDislikes() + 1);
+    public void removeLike(Like like) {
+        // Dissocier le Like de cette Note
+        like.setNote(null);
+        like.setUser(null);
+        likes.remove(like);
     }
 }

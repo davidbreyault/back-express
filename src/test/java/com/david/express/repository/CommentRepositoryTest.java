@@ -52,8 +52,7 @@ public class CommentRepositoryTest {
                         .id(1L)
                         .user(user)
                         .note("Bonjour")
-                        .likes(1)
-                        .dislikes(0)
+                        .likes(new HashSet<>())
                         .createdAt(generateDateFromString("2023-10-02"))
                         .build()
         );

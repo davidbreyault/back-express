@@ -1,17 +1,23 @@
 package com.david.express.service;
 
+import com.david.express.common.Utils;
 import com.david.express.entity.RoleEnum;
 import com.david.express.entity.User;
 import com.david.express.exception.ResourceNotFoundException;
+import com.david.express.model.mapper.UserMapper;
 import com.david.express.repository.UserRepository;
+import com.david.express.model.dto.UserUpdateDto;
 import com.david.express.service.impl.UserServiceImpl;
-import com.david.express.web.user.dto.UserUpdateDTO;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 
 import java.util.*;
 
@@ -26,7 +32,8 @@ public class UserServiceTest {
 
     @Mock
     private UserRepository userRepository;
-
+    @Mock
+    private UserMapper userMapper;
     @InjectMocks
     private UserServiceImpl userService;
 
@@ -62,12 +69,14 @@ public class UserServiceTest {
     @Test
     public void itShouldFindAllUsers() {
         // Given
-        given(userRepository.findAll()).willReturn(Arrays.asList(user1, user2, user3));
+        Page<User> usersPage = new PageImpl<>(Arrays.asList(user1, user2, user3));
+        given(userRepository.findAll(any(Pageable.class))).willReturn(usersPage);
         // When
-        List<User> users = userService.findAllUsers();
+        Pageable paging = Utils.createPaging(0, 500, new String[]{"id", "desc"});
+        Page<User> users = userService.findAllUsers(paging);
         // Then
         assertThat(users).isNotNull();
-        assertThat(users).hasSize(3).contains(user1, user2, user3);
+        assertThat(users.getContent()).hasSize(3).contains(user1, user2, user3);
     }
 
     @Test
@@ -123,17 +132,41 @@ public class UserServiceTest {
     public void itShouldUpdateUser() {
         // Given
         given(userRepository.findById(user1.getId())).willReturn(Optional.of(user1));
-        given(userRepository.save(user1)).willReturn(user1);
-        UserUpdateDTO userUpdateDTO = new UserUpdateDTO("jean-petit", "jean.petit@gmail.com", null, null);
+
+        // Création du DTO avec les informations mises à jour
+        UserUpdateDto userUpdateDto = new UserUpdateDto("jean-petit", "jean.petit@gmail.com", null, null);
+
+        // Création de l'objet mis à jour avec le nouveau username et email
+        // C'est à partir de cet objet qu'il faudra effectuer les comparaisons : user1 ne sera pas directement modifié dans la méthode updateUser car un nouvel objet User est créé et enregistré.
+        User updatedUser = User.builder()
+                .id(user1.getId())
+                .username("jean-petit")
+                .email("jean.petit@gmail.com")
+                .password(user1.getPassword())
+                .roles(user1.getRoles())
+                .build();
+
+        // Simulation du mapping avec le UserMapper
+        given(userMapper.toUserEntity(user1, userUpdateDto)).willReturn(updatedUser);
+        given(userRepository.save(updatedUser)).willReturn(updatedUser);
+
         // When
-        user1 = userService.updateUser(user1.getId(), userUpdateDTO);
+        userService.updateUser(user1.getId(), userUpdateDto);
+
         // Then
-        assertThat(user1).isNotNull();
-        assertEquals(user1.getUsername(), "jean-petit");
-        assertEquals(user1.getPassword(), "password");
-        assertEquals(user1.getEmail(), "jean.petit@gmail.com");
-        assertNotEquals(user1.getUsername(), "John");
-        assertNotEquals(user1.getEmail(), "johndoe@gmail.com");
+        // Vérification que l'utilisateur a bien été mis à jour et sauvegardé
+        assertThat(updatedUser.getUsername()).isEqualTo("jean-petit");
+        assertThat(updatedUser.getUsername()).isNotEqualTo(user1.getUsername());
+        assertThat(updatedUser.getEmail()).isEqualTo("jean.petit@gmail.com");
+
+        // Vérifier que la méthode save a bien été appelée avec le bon utilisateur mis à jour
+        ArgumentCaptor<User> userArgumentCaptor = ArgumentCaptor.forClass(User.class);
+        verify(userRepository).save(userArgumentCaptor.capture());
+        User savedUser = userArgumentCaptor.getValue();
+
+        // Vérification des propriétés du user sauvegardé
+        assertThat(savedUser.getUsername()).isEqualTo("jean-petit");
+        assertThat(savedUser.getEmail()).isEqualTo("jean.petit@gmail.com");
     }
 
     @Test
