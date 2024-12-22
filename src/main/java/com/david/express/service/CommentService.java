@@ -18,5 +18,5 @@ public interface CommentService {
     CommentDto saveComment(Long noteId, CommentDto commentDto);
     CommentDto updateComment(Long id, CommentDto commentDto) throws ResourceNotFoundException, ResourceAffiliationException;
     void deleteCommentById(Long id) throws ResourceNotFoundException, ResourceAffiliationException;
-    boolean isAuthenticatedUserComment(Long id);
+    boolean isCommentPostedByAuthenticatedUser(Long id);
 }

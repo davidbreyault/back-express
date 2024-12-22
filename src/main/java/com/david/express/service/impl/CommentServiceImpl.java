@@ -103,7 +103,7 @@ public class CommentServiceImpl implements CommentService {
         if (securityService.isLoggedUserHasAdminRole()) {
             commentToUpdate = commentMapper.toCommentEntity(commentToUpdate, commentDto);
         } else {
-            if (!isAuthenticatedUserComment(id)) {
+            if (!isCommentPostedByAuthenticatedUser(id)) {
                 throw new ResourceAffiliationException("You are not allowed to update this resource !");
             }
             // Non admin : peut seulement modifier le message du commentaire
@@ -121,7 +121,7 @@ public class CommentServiceImpl implements CommentService {
     public void deleteCommentById(Long id) throws ResourceNotFoundException, ResourceAffiliationException {
         if (!securityService.isLoggedUserHasAdminRole()) {
             // Non admin : Vérifier que le commentaire appartient bien à l'utilisateur connecté
-            if (!isAuthenticatedUserComment(id)) {
+            if (!isCommentPostedByAuthenticatedUser(id)) {
                 throw new ResourceAffiliationException("You are not allowed to delete this resource !");
             }
         }
@@ -129,9 +129,9 @@ public class CommentServiceImpl implements CommentService {
     }
 
     @Override
-    public boolean isAuthenticatedUserComment(Long id) {
+    public boolean isCommentPostedByAuthenticatedUser(Long id) {
         Comment comment = findCommentById(id);
-        // Vérifie que la note appartient bien à l'utilisateur connecté
+        // Vérifie que le commentaire appartient bien à l'utilisateur connecté
         return comment.getUser().getUsername().equals(securityService.getAuthenticatedUsername());
     }
 }
