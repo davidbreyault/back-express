@@ -1,7 +1,8 @@
 package com.david.express.exception;
 
 import com.david.express.validation.ErrorResponseBuilder;
-import com.david.express.validation.dto.ErrorResponseDTO;
+import com.david.express.validation.dto.ErrorResponseDto;
+import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -27,8 +28,8 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler(value = ResourceNotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
-    public @ResponseBody ResponseEntity<Map<String, ErrorResponseDTO>> handleResourceNotFoundException(ResourceNotFoundException ex) {
-        ErrorResponseDTO errors = new ErrorResponseDTO(
+    public @ResponseBody ResponseEntity<Map<String, ErrorResponseDto>> handleResourceNotFoundException(ResourceNotFoundException ex) {
+        ErrorResponseDto errors = new ErrorResponseDto(
                 HttpStatus.NOT_FOUND.getReasonPhrase(),
                 HttpStatus.NOT_FOUND.value(),
                 ex.getMessage(),
@@ -39,8 +40,8 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler(value = ResourceAffiliationException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public @ResponseBody ResponseEntity<Map<String, ErrorResponseDTO>> handleUserNotResourceOwnerException(ResourceAffiliationException ex) {
-        ErrorResponseDTO errors = new ErrorResponseDTO(
+    public @ResponseBody ResponseEntity<Map<String, ErrorResponseDto>> handleUserNotResourceOwnerException(ResourceAffiliationException ex) {
+        ErrorResponseDto errors = new ErrorResponseDto(
                 HttpStatus.BAD_REQUEST.getReasonPhrase(),
                 HttpStatus.BAD_REQUEST.value(),
                 ex.getMessage(),
@@ -51,8 +52,8 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler(ResourceAlreadyExistsException.class)
     @ResponseStatus(value = HttpStatus.CONFLICT)
-    public ResponseEntity<Map<String, ErrorResponseDTO>> handleResourceAlreadyExistsException(ResourceAlreadyExistsException ex) {
-        ErrorResponseDTO errors = new ErrorResponseDTO(
+    public ResponseEntity<Map<String, ErrorResponseDto>> handleResourceAlreadyExistsException(ResourceAlreadyExistsException ex) {
+        ErrorResponseDto errors = new ErrorResponseDto(
                 HttpStatus.CONFLICT.getReasonPhrase(),
                 HttpStatus.CONFLICT.value(),
                 ex.getMessage(),
@@ -63,11 +64,11 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
     @ResponseStatus(value = HttpStatus.BAD_REQUEST)
-    public ResponseEntity<Map<String, ErrorResponseDTO>> handleMethodArgumentTypeMismatchException(MethodArgumentTypeMismatchException ex) {
-        ErrorResponseDTO errors = new ErrorResponseDTO(
+    public ResponseEntity<Map<String, ErrorResponseDto>> handleMethodArgumentTypeMismatchException(MethodArgumentTypeMismatchException ex) {
+        ErrorResponseDto errors = new ErrorResponseDto(
                 HttpStatus.BAD_REQUEST.getReasonPhrase(),
                 HttpStatus.BAD_REQUEST.value(),
-                ex.getMessage(),
+                "The parameter format is not correct.",
                 new Date()
         );
         return new ResponseEntity<>(ErrorResponseBuilder.build(errors), HttpStatus.BAD_REQUEST);
@@ -75,9 +76,9 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler(AccessDeniedException.class)
     @ResponseStatus(value = HttpStatus.FORBIDDEN)
-    public ResponseEntity<Map<String, ErrorResponseDTO>> handleAccessDeniedException(Exception ex) {
-        System.out.println(HttpStatus.FORBIDDEN.value() + " : CA PASSE LA !");
-        ErrorResponseDTO errors = new ErrorResponseDTO(
+    public ResponseEntity<Map<String, ErrorResponseDto>> handleAccessDeniedException(Exception ex) {
+        System.out.println(HttpStatus.FORBIDDEN.value() + " : levée par GlobalExceptionHandler");
+        ErrorResponseDto errors = new ErrorResponseDto(
                 HttpStatus.FORBIDDEN.getReasonPhrase(),
                 HttpStatus.FORBIDDEN.value(),
                 ex.getMessage(),
@@ -89,9 +90,9 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(InsufficientAuthenticationException.class)
     @ResponseStatus(value = HttpStatus.UNAUTHORIZED)
     @ResponseBody
-    public ResponseEntity<Map<String, ErrorResponseDTO>> handleAuthenticationException(Exception ex) {
-        System.out.println(HttpStatus.UNAUTHORIZED.value() + " : CA PASSE LA !");
-        ErrorResponseDTO errors = new ErrorResponseDTO(
+    public ResponseEntity<Map<String, ErrorResponseDto>> handleAuthenticationException(Exception ex) {
+        System.out.println(HttpStatus.UNAUTHORIZED.value() + " : levée par GlobalExceptionHandler");
+        ErrorResponseDto errors = new ErrorResponseDto(
                 HttpStatus.UNAUTHORIZED.getReasonPhrase(),
                 HttpStatus.UNAUTHORIZED.value(),
                 ex.getMessage(),
@@ -109,7 +110,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         List<String> errorMessages = ex.getBindingResult()
                 .getFieldErrors()
                 .stream()
-                .map(fieldError -> fieldError.getDefaultMessage())
+                .map(DefaultMessageSourceResolvable::getDefaultMessage)
                 .collect(Collectors.toList());
 
         Map<String, Object> errors = new HashMap<>();
@@ -124,8 +125,8 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Object> handleGlobalExceptions(Exception ex) {
-        System.out.println(ex);
-        ErrorResponseDTO errors = new ErrorResponseDTO(
+        System.out.println(HttpStatus.INTERNAL_SERVER_ERROR.value() + " : levée par GlobalExceptionHandler");
+        ErrorResponseDto errors = new ErrorResponseDto(
                 HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase(),
                 HttpStatus.INTERNAL_SERVER_ERROR.value(),
                 ex.getMessage(),

@@ -1,17 +1,21 @@
 package com.david.express.service;
 
+import com.david.express.common.Utils;
 import com.david.express.entity.RoleEnum;
 import com.david.express.entity.User;
 import com.david.express.exception.ResourceNotFoundException;
 import com.david.express.repository.UserRepository;
+import com.david.express.model.dto.UserUpdateDto;
 import com.david.express.service.impl.UserServiceImpl;
-import com.david.express.web.user.dto.UserUpdateDTO;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 
 import java.util.*;
 
@@ -62,12 +66,14 @@ public class UserServiceTest {
     @Test
     public void itShouldFindAllUsers() {
         // Given
-        given(userRepository.findAll()).willReturn(Arrays.asList(user1, user2, user3));
+        Page<User> usersPage = new PageImpl<>(Arrays.asList(user1, user2, user3));
+        given(userRepository.findAll(any(Pageable.class))).willReturn(usersPage);
         // When
-        List<User> users = userService.findAllUsers();
+        Pageable paging = Utils.createPaging(0, 500, new String[]{"id", "desc"});
+        Page<User> users = userService.findAllUsers(paging);
         // Then
         assertThat(users).isNotNull();
-        assertThat(users).hasSize(3).contains(user1, user2, user3);
+        assertThat(users.getContent()).hasSize(3).contains(user1, user2, user3);
     }
 
     @Test
@@ -124,9 +130,9 @@ public class UserServiceTest {
         // Given
         given(userRepository.findById(user1.getId())).willReturn(Optional.of(user1));
         given(userRepository.save(user1)).willReturn(user1);
-        UserUpdateDTO userUpdateDTO = new UserUpdateDTO("jean-petit", "jean.petit@gmail.com", null, null);
+        UserUpdateDto userUpdateDto = new UserUpdateDto("jean-petit", "jean.petit@gmail.com", null, null);
         // When
-        user1 = userService.updateUser(user1.getId(), userUpdateDTO);
+        userService.updateUser(user1.getId(), userUpdateDto);
         // Then
         assertThat(user1).isNotNull();
         assertEquals(user1.getUsername(), "jean-petit");

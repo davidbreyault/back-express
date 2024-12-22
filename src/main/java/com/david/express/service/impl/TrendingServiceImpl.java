@@ -13,8 +13,10 @@ import java.util.List;
 
 @Service
 public class TrendingServiceImpl implements TrendingService {
+
     @Autowired
     private NoteRepository noteRepository;
+
     @Override
     public HashMap<String, Integer> getTrendingWords() {
         List<Note> notes = noteRepository.findAll();

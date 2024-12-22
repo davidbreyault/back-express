@@ -43,24 +43,21 @@ public class NoteRepositoryTest {
                 .id(1L)
                 .user(users.get(0))
                 .note("Bonjour")
-                .likes(1)
-                .dislikes(0)
+                .likes(new HashSet<>())
                 .createdAt(generateDateFromString("2023-10-02"))
                 .build();
         note2 = Note.builder()
                 .id(2L)
                 .user(users.get(0))
                 .note("Comment ça va ?")
-                .likes(0)
-                .dislikes(0)
+                .likes(new HashSet<>())
                 .createdAt(generateDateFromString("2023-10-03"))
                 .build();
         note3 = Note.builder()
                 .id(3L)
                 .user(users.get(1))
                 .note("Hello everyone !")
-                .likes(62)
-                .dislikes(0)
+                .likes(new HashSet<>())
                 .createdAt(generateDateFromString("2023-10-05"))
                 .build();
     }
